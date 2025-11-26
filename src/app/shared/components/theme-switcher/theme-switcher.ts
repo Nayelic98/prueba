@@ -1,5 +1,6 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { ThemeService } from '../../../features/simpson/service/theme-service';
 
 @Component({
   selector: 'app-theme-switcher',
@@ -8,20 +9,19 @@ import { Component, signal } from '@angular/core';
   templateUrl: './theme-switcher.html',
 })
 export class ThemeSwitcherComponent {
-  // Temas disponibles
-  themes = ['light', 'dark', 'abyss'];
+  themes = ['light', 'dark', 'forest'];
+  themeService = inject(ThemeService);
 
-  // Tema actual reactivo
-  currentTheme = signal<string>(this.getCurrentTheme());
+  // Signal para mostrar en el botón
+  currentTheme = signal(this.themeService.theme());
 
-  // Obtiene el tema actual desde el atributo HTML
-  private getCurrentTheme(): string {
-    return document.documentElement.getAttribute('data-theme') ?? 'light';
+  constructor() {
+    // Inicializa currentTheme desde el servicio
+    this.currentTheme.set(this.themeService.theme());
   }
 
-  // Cambia el tema y actualiza el atributo global
-  setTheme(theme: string): void {
-    document.documentElement.setAttribute('data-theme', theme);
+  setTheme(theme: string) {
+    this.themeService.setTheme(theme);
     this.currentTheme.set(theme);
   }
 }
