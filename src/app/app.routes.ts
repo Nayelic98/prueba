@@ -1,37 +1,13 @@
 import { Routes } from '@angular/router';
-import { EstilosPage } from './features/estilos-page/estilos-page';
-import { SignalBox } from './features/signal-box/signal-box';
-import { DaisyuiPage } from './features/daisyui-page/daisyui-page';
-import { Drawer } from './features/daisyui-page/components/drawer/drawer';
-import { SimpsonsPageComponent } from './features/simpsons-page/simpsons-page';
-import { SimpsonDetailPageComponent } from './features/simpson-detail-page/simpson-detail-page';
+import { LoginPage } from './auth/login-page/login-page';
+
+// import { PokemonDetailPage } from './pokemon/pages/home-page/pokemos-detail-page/pokemos-detail-page';
+import { HomePage } from './pokemon/pages/home-page/home-page';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: DaisyuiPage
-  },
-  {
-    path: '',
-    component: EstilosPage
-  },
-  {
-    path: 'estilos',
-    component: EstilosPage
-  },
-  {
-    path:'',
-    component: SignalBox
-  },
-  {
-  path: 'simpsons',
-  component: SimpsonsPageComponent,
-},
-{
-  path: 'simpsons/:id',
-  component: SimpsonDetailPageComponent,
-},
-
-
+  { path: '', component: LoginPage },
+{ path: 'home', component: HomePage },
+//   { path: 'pokemon/:id', component: PokemonDetailPage },
+  { path: '**', redirectTo: '' }
 
 ];

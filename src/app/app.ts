@@ -1,17 +1,16 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { Footer } from "./features/daisyui-page/components/footer/footer";
-import { Drawer } from './features/daisyui-page/components/drawer/drawer';
-import { BackToTop } from "./shared/components/back-to-top/back-to-top";
+import { LoginPage } from './auth/login-page/login-page';
+// import { HomePage } from './pokemon/pages/home-page/home-page';
+// import { PokemonDetailPage } from './pokemon/pages/home-page/pokemos-detail-page/pokemos-detail-page';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Footer, Drawer, BackToTop],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css',
-  providers: [],
+  styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('03-ui-componentes-estilos');
+  protected readonly title = signal('angular-pokemon-app');
   
 }

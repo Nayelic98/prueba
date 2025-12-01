@@ -1,0 +1,43 @@
+<section class="p-6 space-y-6">
+
+  <header class="hero bg-base-200 p-6 rounded-xl">
+    <h1 class="text-3xl font-bold">
+      Total de Pokémon: {{ pokemons.value()?.count }}
+    </h1>
+  </header>
+
+  @if (pokemons.isLoading()) {
+    <p>Cargando...</p>
+  }
+
+  @if (pokemons.error()) {
+    <p>Error cargando datos</p>
+  }
+
+  @if (pokemons.value()) {
+
+    <!-- Se guarda value en una variable para evitar paréntesis -->
+    @let data = pokemons.value();
+
+    <ul class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      @for (p of data.results; track p.name) {
+        <li>
+          <article class="p-4 shadow-lg bg-white rounded-xl flex justify-between">
+            <span class="capitalize">{{ p.name }}</span>
+
+            <button class="btn btn-outline btn-sm"
+                    (click)="goDetail(p.url)">
+              Ver detalles
+            </button>
+          </article>
+        </li>
+      }
+    </ul>
+
+    <div class="flex justify-between mt-6">
+      <button class="btn" (click)="prevPage()">Anterior</button>
+      <button class="btn btn-primary" (click)="nextPage()">Siguiente</button>
+    </div>
+
+  }
+</section>

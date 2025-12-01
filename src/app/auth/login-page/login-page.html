@@ -1,0 +1,32 @@
+<section class="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
+  <header class="text-center mb-6">
+    <h1 class="text-2xl font-bold">Iniciar Sesión</h1>
+  </header>
+
+  <form [formGroup]="loginForm" (ngSubmit)="submit()">
+    <!-- Email -->
+    <div class="mb-4">
+      <label class="block mb-1">Email</label>
+      <input formControlName="email" type="email" class="input input-bordered w-full">
+      <div *ngIf="submitted() && loginForm.controls.email.invalid" class="text-red-500 text-sm">
+        Email inválido
+      </div>
+    </div>
+
+    <!-- Password -->
+    <div class="mb-4">
+      <label class="block mb-1">Contraseña</label>
+      <input formControlName="password" type="password" class="input input-bordered w-full">
+      <div *ngIf="submitted() && loginForm.controls.password.invalid" class="text-red-500 text-sm">
+        Contraseña mínima 6 caracteres
+      </div>
+    </div>
+
+    <!-- Error general -->
+    <div *ngIf="submitted() && errorMessage()" class="text-red-600 mb-4">
+      {{ errorMessage() }}
+    </div>
+
+    <button type="submit" class="btn btn-primary w-full">Ingresar</button>
+  </form>
+</section>
