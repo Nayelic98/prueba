@@ -8,13 +8,13 @@ import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
   selector: 'app-login-page',
   templateUrl: './login-page.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule], // NgIf para @if
+  imports: [CommonModule, RouterModule, ReactiveFormsModule], 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {
   errorMessage = signal('');
   loginForm;
-  submitted = signal(false); // <-- nueva señal
+  submitted = signal(false); 
 
   constructor(private fb: FormBuilder, private router: Router) {
     this.loginForm = this.fb.group({
@@ -24,10 +24,10 @@ export class LoginPage {
   }
 
   submit() {
-    this.submitted.set(true); // <-- marcamos que ya se intentó enviar
+    this.submitted.set(true); 
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
-      if (email === 'ADMIN' && password === 'admin123') {
+      if (email === 'usuario@ups.edu.ec' && password === '123456') {
         this.router.navigate(['/home']);
       } else {
         this.errorMessage.set('Usuario o contraseña incorrectos');
