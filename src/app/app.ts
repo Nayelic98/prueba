@@ -3,10 +3,12 @@ import { LoginPage } from './auth/login-page/login-page';
 // import { HomePage } from './pokemon/pages/home-page/home-page';
 // import { PokemonDetailPage } from './pokemon/pages/home-page/pokemos-detail-page/pokemos-detail-page';
 import { Router, RouterOutlet } from '@angular/router';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
+  providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
