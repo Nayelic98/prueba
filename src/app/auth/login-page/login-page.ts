@@ -36,23 +36,27 @@ export class LoginPage {
   }
 
   submit() {
-    this.submitted.set(true); 
+  this.submitted.set(true); 
 
-    if (!this.loginForm.valid) {
-      FormUtils.markAllAsDirty(this.loginForm);
-      this.errorMessage.set('Por favor, completa correctamente los campos');
-      return;
-    }
-
-    const { email, password } = this.loginForm.value;
-
-    if (email === 'usuario@ups.edu.ec' && password === '123456') {
-      const user: UserSession = { email, token: 'dummy-token' };
-      localStorage.setItem('user', JSON.stringify(user));
-
-      this.router.navigate(['/home']);
-    } else {
-      this.errorMessage.set('Usuario o contraseña incorrectos');
-    }
+  if (!this.loginForm.valid) {
+    FormUtils.markAllAsDirty(this.loginForm);
+    this.errorMessage.set('Por favor, completa correctamente los campos');
+    return;
   }
+
+  const { email, password } = this.loginForm.value;
+
+  if (email === 'usuario@ups.edu.ec' && password === '123456') {
+    const user: UserSession = { email, token: 'dummy-token' };
+    
+    // Guarda la sesión en localStorage
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('isLogged', 'true'); // opcional para control rápido
+
+    this.router.navigate(['/home']); // redirige al home
+  } else {
+    this.errorMessage.set('Usuario o contraseña incorrectos');
+  }
+}
+
 }

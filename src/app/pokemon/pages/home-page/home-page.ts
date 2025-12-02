@@ -1,10 +1,13 @@
 import { Component, signal, effect, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PokemonService } from '../../services/services';
-import { PaginationService } from '../../services/pagination-service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs';
-import { PaginationComponent } from '../../../shared/pagination/pagination';
+
+export interface UserSession {
+  email: string;
+  token: string;
+}
 
 @Component({
   standalone: true,
@@ -19,7 +22,6 @@ export class HomePage {
 
   // Lee pagina actual o usa 1
   activePage = signal(Number(localStorage.getItem('page') || 1));
-
   totalPages = signal(0);
 
   pokemonResource = toSignal(
@@ -30,13 +32,18 @@ export class HomePage {
     { initialValue: null }
   );
 
+  user: UserSession | null = null; // guardamos la sesión
+
   constructor() {
     // 1️⃣ Validar sesión
     const savedUser = localStorage.getItem('user');
     if (!savedUser) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/']); // Redirige al login si no hay usuario
       return;
     }
+
+    // Decodificar el usuario
+    this.user = JSON.parse(savedUser);
 
     // 2️⃣ Efecto para guardar estado y evitar romper GitHub Pages
     effect(() => {
