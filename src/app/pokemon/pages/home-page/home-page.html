@@ -1,84 +1,63 @@
-<section class="p-8 max-w-5xl mx-auto">
-
-  <h1 class="text-4xl font-extrabold mb-2 text-center text-primary">
-    Pokémon API
-  </h1>
-
-  <h2 class="text-lg text-center mb-8 text-gray-600">
-    Listado de Pokémon
-  </h2>
+<section class="p-8">
+  <!-- Hero con total de Pokémon -->
+  @if (pokemonResource()) {
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold">Total Pokémon: {{ pokemonResource()?.count }}</h1>
+      <p class="text-gray-600">Página {{ activePage() }} de {{ totalPages() }}</p>
+    </div>
+  }
 
   <!-- Spinner -->
   @if (!pokemonResource()) {
     <div class="flex justify-center items-center h-64">
-      <span class="loading loading-spinner text-primary loading-lg"></span>
+      <span class="loading loading-spinner loading-lg"></span>
     </div>
   }
 
-  <!-- Paginación -->
+  <!-- Listado de Pokémon -->
   @if (pokemonResource()) {
-    <div class="flex items-center justify-center mb-6">
-      <app-pagination
-        [pages]="pokemonResource()?.pages ?? 0"
-        [currentPage]="paginationService.currentPage()"
-      ></app-pagination>
-    </div>
+    <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      @for (poke of pokemonResource()?.results ?? []; track poke.name) {
+        <li class="card p-4 shadow-lg hover:shadow-xl transition-all rounded-lg">
+          <img
+            [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + getIdFromUrl(poke.url) + '.png'"
+            class="w-20 h-20 mx-auto"
+            [alt]="poke.name"
+          />
+          <h3 class="text-center mt-2 capitalize font-semibold">{{ poke.name }}</h3>
+          <a 
+            [routerLink]="['/pokemon', getIdFromUrl(poke.url)]"
+            class="btn btn-sm btn-primary mt-2 block mx-auto"
+          >Ver Detalle</a>
+        </li>
+      }
+    </ul>
   }
 
-  <!-- Tabla -->
+  <!-- Controles de paginación -->
   @if (pokemonResource()) {
+    <div class="join flex justify-center items-center gap-2 mt-6">
+      <button
+        class="join-item btn"
+        (click)="previousPage()"
+        [disabled]="activePage() === 1"
+      >«</button>
 
-    <div class="overflow-x-auto shadow-lg rounded-xl border border-gray-300">
-      <table class="table table-zebra">
-        <thead class="bg-primary text-white text-sm">
-          <tr>
-            <th>ID</th>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-        </thead>
+      @for (page of getPagesList(); track page) {
+        <button
+          class="join-item btn"
+          [class.btn-primary]="page === activePage()"
+          (click)="activePage.set(page)"
+        >
+          {{ page }}
+        </button>
+      }
 
-        <tbody>
-          @for (poke of pokemonResource()?.results ?? []; track poke.name) {
-
-            <tr class="hover:bg-primary/10 transition-all duration-200">
-
-              <!-- ID -->
-              <td class="font-bold text-gray-700">
-                {{ getIdFromUrl(poke.url) }}
-              </td>
-
-              <!-- Imagen -->
-              <td>
-                <img
-                  [src]="'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + getIdFromUrl(poke.url) + '.png'"
-                  class="w-12 h-12 drop-shadow-lg hover:scale-110 transition-transform"
-                  alt="{{ poke.name }}"
-                />
-              </td>
-
-              <!-- Nombre -->
-              <td class="capitalize font-semibold text-gray-800">
-                {{ poke.name }}
-              </td>
-
-              <!-- Botón -->
-              <td class="text-center">
-                <a 
-                  [routerLink]="['/pokemon', getIdFromUrl(poke.url)]" 
-                  class="btn btn-sm btn-primary rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform"
-                >
-                  Ver Detalle
-                </a>
-              </td>
-
-            </tr>
-
-          }
-        </tbody>
-      </table>
+      <button
+        class="join-item btn"
+        (click)="nextPage()"
+        [disabled]="activePage() === totalPages()"
+      >»</button>
     </div>
   }
-
 </section>

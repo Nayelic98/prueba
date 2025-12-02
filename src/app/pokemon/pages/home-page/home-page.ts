@@ -12,46 +12,50 @@ import { PaginationComponent } from '../../../shared/pagination/pagination';
   templateUrl: './home-page.html',
 })
 export class HomePage {
-
   private pokemonService = inject(PokemonService);
   paginationService = inject(PaginationService);
   private route = inject(ActivatedRoute);
 
-  /** -------------------------------------------------------
-   * Convertir URL en ID (✔ lo que necesitabas)
-   * ------------------------------------------------------*/
-  getIdFromUrl(url: string): number {
-    return Number(url.split('/').filter(x => x).pop());
-  }
+  activePage = signal(Number(localStorage.getItem('page') || 1));
+  totalPages = signal(0);
 
-  /** -------------------------------------------------------
-   * 1) Recurso reactivo por query param ?page=
-   * ------------------------------------------------------*/
+  // Recurso reactivo de Pokémon
   pokemonResource = toSignal(
     this.route.queryParamMap.pipe(
-      map(params => Number(params.get('page')) || 1),
-      switchMap(page => this.pokemonService.getCharacters(page))
+      map((params) => Number(params.get('page')) || this.activePage()),
+      switchMap((page) => this.pokemonService.getCharacters(page))
     ),
     { initialValue: null }
   );
 
-  /** Total de Pokémon */
-  pokemonCount = signal(0);
-
-  /** Total de páginas */
-  totalPages = signal(0);
-
   constructor() {
+    // Actualiza totalPages y guarda la página en localStorage
     effect(() => {
       const data = this.pokemonResource();
-
       if (!data) return;
 
-      this.pokemonCount.set(data.count ?? 0);
-      const pages = Math.ceil((data.count ?? 0) / 20); 
-      this.totalPages.set(pages);
-
-      console.log('PokemonResource changed:', data);
+      this.totalPages.set(Math.ceil((data.count ?? 0) / 20));
+      localStorage.setItem('page', this.activePage().toString());
     });
+  }
+
+  // Genera lista de páginas
+  getPagesList(): number[] {
+    const pages = this.totalPages();
+    return Array.from({ length: pages }, (_, i) => i + 1);
+  }
+
+  // Botones siguiente y anterior
+  nextPage() {
+    if (this.activePage() < this.totalPages()) this.activePage.set(this.activePage() + 1);
+  }
+
+  previousPage() {
+    if (this.activePage() > 1) this.activePage.set(this.activePage() - 1);
+  }
+
+  // Convierte la URL de la API en ID
+  getIdFromUrl(url: string): number {
+    return Number(url.split('/').filter(x => x).pop());
   }
 }
