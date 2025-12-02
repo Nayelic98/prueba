@@ -1,0 +1,94 @@
+<section class="p-8">
+
+  <!-- Spinner -->
+  @if (!personaje()) {
+    <div class="flex justify-center items-center h-64">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  }
+
+  <!-- Detalle Pokémon -->
+  @if (personaje()) {
+
+    <div class="card bg-base-100 shadow-xl p-6 max-w-4xl mx-auto">
+
+      <!-- Imagen del pokémon -->
+      <figure class="flex justify-center mb-4">
+        <img
+          [src]="personaje()?.sprites?.front_default"
+          [alt]="personaje()?.name"
+          class="w-40 h-40"
+        />
+      </figure>
+
+      <div class="card-body">
+
+        <!-- Nombre -->
+        <h2 class="card-title text-3xl font-bold capitalize">
+          {{ personaje()?.name }}
+        </h2>
+
+        <!-- Tipo(s) -->
+        <div class="flex gap-2 mb-4">
+          @for (tipo of personaje()?.types ?? []; track tipo.slot) {
+            <span class="badge badge-primary capitalize">
+              {{ tipo.type.name }}
+            </span>
+          }
+        </div>
+
+        <!-- Info general -->
+        <p class="text-gray-600 mb-2">
+          <strong>Experiencia base:</strong> {{ personaje()?.base_experience }}
+        </p>
+
+        <p class="text-gray-600 mb-2">
+          <strong>Altura:</strong> {{ personaje()?.height }} dm
+        </p>
+
+        <p class="text-gray-600 mb-4">
+          <strong>Peso:</strong> {{ personaje()?.weight }} hg
+        </p>
+
+        <!-- Habilidades -->
+        <div class="mb-4">
+          <h3 class="font-semibold text-lg">Habilidades</h3>
+          <ul class="list-disc pl-6">
+            @for (hab of personaje()?.abilities ?? []; track hab.slot) {
+              <li class="capitalize">
+                {{ hab.ability?.name }}
+                <span *ngIf="hab.is_hidden">(oculta)</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="mb-4">
+          <h3 class="font-semibold text-lg">Estadísticas</h3>
+          <ul class="list-disc pl-6">
+            @for (stat of personaje()?.stats ?? []; track stat.stat.name) {
+              <li class="capitalize">
+                {{ stat.stat.name }}: <strong>{{ stat.base_stat }}</strong>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Movimientos (solo primeros 6 para no saturar) -->
+        <div class="mb-4">
+          <h3 class="font-semibold text-lg">Movimientos</h3>
+          <ul class="list-disc pl-6">
+            @for (mov of personaje()?.moves?.slice(0, 6) ?? []; track mov.move.name) {
+              <li class="capitalize">
+                {{ mov.move.name }}
+              </li>
+            }
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  }
+</section>

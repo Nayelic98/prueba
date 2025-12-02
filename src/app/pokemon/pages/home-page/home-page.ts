@@ -1,49 +1,57 @@
-import { Component, signal, effect } from '@angular/core';
-import { NgIf, NgFor } from '@angular/common';
-import { Router } from '@angular/router';
-import { PokemonService } from '../../services';
+import { Component, signal, effect, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { PokemonService } from '../../services/services';
+import { PaginationService } from '../../services/pagination-service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, switchMap } from 'rxjs';
+import { PaginationComponent } from '../../../shared/pagination/pagination';
 
 @Component({
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [RouterLink, PaginationComponent],
   templateUrl: './home-page.html',
 })
 export class HomePage {
 
-  offset = signal(0);
-  limit = 20;
+  private pokemonService = inject(PokemonService);
+  paginationService = inject(PaginationService);
+  private route = inject(ActivatedRoute);
 
-  // solo declaras, NO inicializas aquí
-  pokemons: any;
+  /** -------------------------------------------------------
+   * Convertir URL en ID (✔ lo que necesitabas)
+   * ------------------------------------------------------*/
+  getIdFromUrl(url: string): number {
+    return Number(url.split('/').filter(x => x).pop());
+  }
 
-  constructor(
-    private pokemonService: PokemonService,
-    private router: Router
-  ) {
+  /** -------------------------------------------------------
+   * 1) Recurso reactivo por query param ?page=
+   * ------------------------------------------------------*/
+  pokemonResource = toSignal(
+    this.route.queryParamMap.pipe(
+      map(params => Number(params.get('page')) || 1),
+      switchMap(page => this.pokemonService.getCharacters(page))
+    ),
+    { initialValue: null }
+  );
 
-    // ✔ ahora sí puedes usar pokemonService
-    this.pokemons = this.pokemonService.list(this.offset(), this.limit);
+  /** Total de Pokémon */
+  pokemonCount = signal(0);
 
+  /** Total de páginas */
+  totalPages = signal(0);
+
+  constructor() {
     effect(() => {
-      this.pokemons = this.pokemonService.list(
-        this.offset(),
-        this.limit
-      );
+      const data = this.pokemonResource();
+
+      if (!data) return;
+
+      this.pokemonCount.set(data.count ?? 0);
+      const pages = Math.ceil((data.count ?? 0) / 20); 
+      this.totalPages.set(pages);
+
+      console.log('PokemonResource changed:', data);
     });
-  }
-
-  nextPage() {
-    this.offset.update(v => v + 20);
-  }
-
-  prevPage() {
-    if (this.offset() > 0) {
-      this.offset.update(v => v - 20);
-    }
-  }
-
-  goDetail(url: string) {
-    const id = url.split('/').at(-2)!;
-    this.router.navigate(['/pokemon', id]);
   }
 }
