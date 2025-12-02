@@ -1,0 +1,7 @@
+<script>
+  // Redirige todas las rutas a index.html para Angular
+  var path = window.location.pathname;
+  var index = path.lastIndexOf('/');
+  var page = path.substring(index + 1);
+  window.location.href = '/prueba/index.html';
+</script>
