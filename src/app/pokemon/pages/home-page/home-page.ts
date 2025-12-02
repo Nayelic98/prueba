@@ -8,56 +8,59 @@ import { PaginationComponent } from '../../../shared/pagination/pagination';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, PaginationComponent],
+  imports: [RouterLink],
   templateUrl: './home-page.html',
 })
 export class HomePage {
+
   private pokemonService = inject(PokemonService);
-  paginationService = inject(PaginationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  // Lee el usuario y la página actual desde localStorage
+  // Lee pagina actual o usa 1
   activePage = signal(Number(localStorage.getItem('page') || 1));
 
   totalPages = signal(0);
 
-  // Recurso reactivo de Pokémon
   pokemonResource = toSignal(
     this.route.queryParamMap.pipe(
-      map((params) => Number(params.get('page')) || this.activePage()),
-      switchMap((page) => this.pokemonService.getCharacters(page))
+      map(params => Number(params.get('page')) || this.activePage()),
+      switchMap(page => this.pokemonService.getCharacters(page))
     ),
     { initialValue: null }
   );
 
   constructor() {
-    // Verificar si hay usuario guardado
+    // 1️⃣ Validar sesión
     const savedUser = localStorage.getItem('user');
-    console.log('Usuario guardado en localStorage:', savedUser);
     if (!savedUser) {
-      console.warn('No hay usuario guardado, redirigiendo al login...');
       this.router.navigate(['/']);
       return;
     }
 
-    // Actualiza totalPages y guarda la página en localStorage
+    // 2️⃣ Efecto para guardar estado y evitar romper GitHub Pages
     effect(() => {
       const data = this.pokemonResource();
       if (!data) return;
 
       this.totalPages.set(Math.ceil((data.count ?? 0) / 20));
+
+      // Guarda la página actual
       localStorage.setItem('page', this.activePage().toString());
+
+      // Actualiza URL para evitar error 404 al recargar en GitHub Pages
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { page: this.activePage() },
+        replaceUrl: true
+      });
     });
   }
 
-  // Genera lista de páginas
   getPagesList(): number[] {
-    const pages = this.totalPages();
-    return Array.from({ length: pages }, (_, i) => i + 1);
+    return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
   }
 
-  // Botones siguiente y anterior
   nextPage() {
     if (this.activePage() < this.totalPages()) this.activePage.set(this.activePage() + 1);
   }
@@ -66,7 +69,6 @@ export class HomePage {
     if (this.activePage() > 1) this.activePage.set(this.activePage() - 1);
   }
 
-  // Convierte la URL de la API en ID
   getIdFromUrl(url: string): number {
     return Number(url.split('/').filter(x => x).pop());
   }

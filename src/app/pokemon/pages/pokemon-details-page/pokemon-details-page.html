@@ -54,14 +54,17 @@
         <div class="mb-4">
           <h3 class="font-semibold text-lg">Habilidades</h3>
           <ul class="list-disc pl-6">
-            @for (hab of personaje()?.abilities ?? []; track hab.slot) {
+            @for (hab of personaje()?.abilities; track hab.slot) {
               <li class="capitalize">
-                {{ hab.ability?.name }}
-                <span *ngIf="hab.is_hidden">(oculta)</span>
+                {{ hab.ability.name }}
+                @if (hab.is_hidden) {
+                  <span>(oculta)</span>
+                }
               </li>
             }
           </ul>
         </div>
+
 
         <!-- Estadísticas -->
         <div class="mb-4">
