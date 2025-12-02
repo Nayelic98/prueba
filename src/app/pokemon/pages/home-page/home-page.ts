@@ -1,5 +1,5 @@
 import { Component, signal, effect, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PokemonService } from '../../services/services';
 import { PaginationService } from '../../services/pagination-service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,8 +15,11 @@ export class HomePage {
   private pokemonService = inject(PokemonService);
   paginationService = inject(PaginationService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
+  // Lee el usuario y la página actual desde localStorage
   activePage = signal(Number(localStorage.getItem('page') || 1));
+
   totalPages = signal(0);
 
   // Recurso reactivo de Pokémon
@@ -29,6 +32,15 @@ export class HomePage {
   );
 
   constructor() {
+    // Verificar si hay usuario guardado
+    const savedUser = localStorage.getItem('user');
+    console.log('Usuario guardado en localStorage:', savedUser);
+    if (!savedUser) {
+      console.warn('No hay usuario guardado, redirigiendo al login...');
+      this.router.navigate(['/']);
+      return;
+    }
+
     // Actualiza totalPages y guarda la página en localStorage
     effect(() => {
       const data = this.pokemonResource();
