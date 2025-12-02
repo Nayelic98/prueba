@@ -1,36 +1,51 @@
-import { Component, computed, input, linkedSignal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, input, Output, EventEmitter, linkedSignal, computed } from '@angular/core';
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
-  imports: [RouterLink],
   templateUrl: './pagination.html',
 })
 export class PaginationComponent {
-  pages = input(0);
-  currentPage = input<number>(1);
+  pages = input(0); // total de páginas
+  currentPage = input<number>(1); // página inicial
   activePage = linkedSignal(this.currentPage);
+
+  @Output() activePageChange = new EventEmitter<number>();
 
   getPagesList = computed(() => {
     const totalPages = this.pages();
     const current = this.activePage();
-
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const windowSize = 20;
+    let start = Math.max(1, current - Math.floor(windowSize / 2));
+    let end = start + windowSize - 1;
+    if (end > totalPages) {
+      end = totalPages;
+      start = Math.max(1, end - windowSize + 1);
     }
 
-    const start = Math.max(1, current - 2);
-    const end = Math.min(totalPages, start + 4);
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    const pages: number[] = [];
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   });
 
- previousPage() {
-    if (this.activePage() > 1) this.activePage.update((n) => n - 1);
+  previousPage() {
+    if (this.activePage() > 1) {
+      this.activePage.update(n => n - 1);
+      this.activePageChange.emit(this.activePage());
+    }
   }
 
   nextPage() {
-    if (this.activePage() < this.pages()) this.activePage.update((n) => n + 1);
+    if (this.activePage() < this.pages()) {
+      this.activePage.update(n => n + 1);
+      this.activePageChange.emit(this.activePage());
+    }
+  }
+
+  setPage(page: number) {
+    this.activePage.set(page);
+    this.activePageChange.emit(page);
   }
 }

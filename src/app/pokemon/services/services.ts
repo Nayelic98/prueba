@@ -9,45 +9,26 @@ import { PokemonCharacterDetail } from '../pages/home-page/interface/pokemos-det
 export class PokemonService {
 
   private http = inject(HttpClient);
-  private readonly API_URL = environment.apiUrl; // https://pokeapi.co/api/v2/pokemon
+  private readonly API_URL = environment.apiUrl; 
 
-  // LISTAR POKÉMON
   getCharacters(page: number = 1): Observable<PokemonResponseTs> {
-    const limit = 20;
-    const offset = (page - 1) * limit;
-    console.log('🔍 getCharacters() ejecutado. Página:', page);
-console.log('🔗 URL que se está llamando:', `${this.API_URL}?limit=${limit}&offset=${offset}`);
+  const limit = 20;
+  const offset = (page - 1) * limit; 
+  return this.http.get<PokemonResponseTs>(`${this.API_URL}?limit=${limit}&offset=${offset}`);
+}
 
-    return this.http.get<PokemonResponseTs>(
-      `${this.API_URL}?limit=${limit}&offset=${offset}`
-    ).pipe(
 
-      // 👇 IMPRIME LO QUE LLEGA DESDE LA API
-      tap(data => console.log("📌 DATA DESDE API:", data)),
+    
 
-      catchError(err => {
-        console.error('❌ Error al obtener personajes:', err);
-        return of({
-          count: 0,
-          next: null,
-          prev: null,
-          pages: 0,
-          results: []
-        });
-      })
-    );
-  }
-
-  // DETALLE DE POKÉMON POR ID
   getCharacterById(id: number): Observable<PokemonCharacterDetail | null> {
     return this.http.get<PokemonCharacterDetail>(`${this.API_URL}/${id}`).pipe(
 
-      // 👇 IMPRIME EL DETALLE DEL PERSONAJE
-      tap(data => console.log(`📌 DATA DETALLE (${id}):`, data)),
-
-      catchError(err => {
-        console.error(`❌ Error al obtener personaje con ID ${id}:`, err);
-        return of(null);
+      
+      
+      tap((data) => console.log('Character data:', data)),
+      catchError((error) => {
+        console.error('Error fetching character by ID:', error);
+        return of(null); 
       })
     );
   }

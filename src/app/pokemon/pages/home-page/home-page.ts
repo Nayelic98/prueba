@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PokemonService } from '../../services/services';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, switchMap } from 'rxjs';
+import { PaginationComponent } from '../../../shared/pagination/pagination';
 
 export interface UserSession {
   email: string;
@@ -11,7 +12,7 @@ export interface UserSession {
 
 @Component({
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink,PaginationComponent],
   templateUrl: './home-page.html',
 })
 export class HomePage {
@@ -20,61 +21,53 @@ export class HomePage {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  // Lee pagina actual o usa 1
+  // Paginación
   activePage = signal(Number(localStorage.getItem('page') || 1));
-  totalPages = signal(0);
+totalPages = signal(0);
+limit = 20;
 
-  pokemonResource = toSignal(
-    this.route.queryParamMap.pipe(
-      map(params => Number(params.get('page')) || this.activePage()),
-      switchMap(page => this.pokemonService.getCharacters(page))
-    ),
-    { initialValue: null }
-  );
+pokemonResource = toSignal(
+  this.route.queryParamMap.pipe(
+    map(params => Number(params.get('page')) || this.activePage()),
+    switchMap(page => this.pokemonService.getCharacters(page))
+  ),
+  { initialValue: null }
+);
 
-  user: UserSession | null = null; // guardamos la sesión
+
+  user = signal<UserSession | null>(null);
 
   constructor() {
-    // 1️⃣ Validar sesión
+    // Validar sesión
     const savedUser = localStorage.getItem('user');
     if (!savedUser) {
-      this.router.navigate(['/']); // Redirige al login si no hay usuario
+      this.router.navigate(['/']);
       return;
     }
+    this.user.set(JSON.parse(savedUser));
 
-    // Decodificar el usuario
-    this.user = JSON.parse(savedUser);
-
-    // 2️⃣ Efecto para guardar estado y evitar romper GitHub Pages
     effect(() => {
       const data = this.pokemonResource();
       if (!data) return;
 
-      this.totalPages.set(Math.ceil((data.count ?? 0) / 20));
-
-      // Guarda la página actual
+      this.totalPages.set(Math.ceil((data.count ?? 0) / this.limit));
       localStorage.setItem('page', this.activePage().toString());
 
-      // Actualiza URL para evitar error 404 al recargar en GitHub Pages
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: { page: this.activePage() },
         replaceUrl: true
       });
     });
+
+    effect(() => {
+      const currentUser = this.user();
+      if (currentUser) localStorage.setItem('user', JSON.stringify(currentUser));
+    });
   }
 
-  getPagesList(): number[] {
-    return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
-  }
-
-  nextPage() {
-    if (this.activePage() < this.totalPages()) this.activePage.set(this.activePage() + 1);
-  }
-
-  previousPage() {
-    if (this.activePage() > 1) this.activePage.set(this.activePage() - 1);
-  }
+  
+  
 
   getIdFromUrl(url: string): number {
     return Number(url.split('/').filter(x => x).pop());
